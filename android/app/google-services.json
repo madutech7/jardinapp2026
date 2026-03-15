@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "281914321358",
+    "project_id": "monjardin-afae3",
+    "storage_bucket": "monjardin-afae3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281914321358:android:c1ac5366e8b93e04d2239f",
+        "android_client_info": {
+          "package_name": "com.jardinapp.jardinapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1quNRfeCBkQ9raML324MiCprJpa7-Ous"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281914321358:android:a1f3fe6e59b6f6eed2239f",
+        "android_client_info": {
+          "package_name": "com.monjardin.monjardin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1quNRfeCBkQ9raML324MiCprJpa7-Ous"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

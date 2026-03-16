@@ -1,17 +1,15 @@
+# ios/Podfile
 platform :ios, '13.0'
 
-# Flutter Google Designs
-install! 'cocoapods', :deterministic_uuids => false
+# Emplacement du helper script de Flutter
+flutter_install_all_ios_pods = File.expand_path(File.join('..', 'Flutter', 'podhelper.rb'), __FILE__)
+require flutter_install_all_ios_pods
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
   flutter_install_all_ios_pods File.expand_path(File.join('..', 'Flutter'), __FILE__)
-
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
 end
 
 post_install do |installer|

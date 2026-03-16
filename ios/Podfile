@@ -1,28 +1,31 @@
 # ios/Podfile
 platform :ios, '13.0'
 
-# CocoaPods analytics sends network stats synchronously affecting build performance.
 ENV['COCOAPODS_DISABLE_STATS'] = '1'
 
-project 'Runner', {
-  'Debug' => :debug,
-  'Release' => :release,
-  'Profile' => :profile,
-}
+# Localisation du SDK Flutter
+def find_flutter_root
+  # 1. Utiliser la variable d'environnement (standard sur Codemagic/CI)
+  return ENV['FLUTTER_ROOT'] if ENV['FLUTTER_ROOT'] && !ENV['FLUTTER_ROOT'].empty?
 
-def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  # 2. Chercher dans Generated.xcconfig (local)
+  xcconfig_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  if File.exist?(xcconfig_path)
+    File.foreach(xcconfig_path) do |line|
+      if line =~ /FLUTTER_ROOT\s*=\s*(.*)/
+        return $1.strip
+      end
+    end
   end
-
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/\AFLUTTER_ROOT=(.*)\z/)
-    return matches[1] if matches
-  end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig and regenerate it with flutter pub get"
+  nil
 end
 
+flutter_root = find_flutter_root
+if flutter_root.nil?
+  raise "FLUTTER_ROOT introuvable. Assurez-vous que Flutter est installé."
+end
+
+# Chargement du script d'aide de Flutter
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 target 'Runner' do

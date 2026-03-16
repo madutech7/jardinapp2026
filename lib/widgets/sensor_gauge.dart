@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 
+/// Widget affichant une jauge de capteur (température, humidité, lumière)
+/// sous forme de carte avec une icône, une valeur textuelle et une barre de progression.
 class SensorGauge extends StatelessWidget {
-  final String label;
-  final double value;
-  final String unit;
-  final IconData icon;
-  final Color color;
-  final bool isAlert;
-  final double max;
-
+  final String label; // Nom de la mesure (ex: "Humidité")
+  final double value; // Valeur actuelle de la mesure
+  final String unit; // Unité de mesure (ex: "%" ou "°C")
+  final IconData icon; // Icône associée au capteur
+  final Color color; // Couleur principale de la jauge
+  final bool isAlert; // Indique si la valeur est hors des limites normales (déclenche un style d'alerte)
+  final double max; // Valeur maximale possible pour calculer le remplissage de la barre
+  
   const SensorGauge({
     super.key,
     required this.label,
@@ -23,8 +25,11 @@ class SensorGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calcul de la fraction de remplissage de la barre (entre 0.0 et 1.0)
     final fraction = (value / max).clamp(0.0, 1.0);
+    // Si la valeur est en alerte, on force la couleur en rouge, sinon on utilise la couleur fournie
     final displayColor = isAlert ? AppTheme.dangerRed : color;
+    // Si en alerte, le fond de la carte est légèrement teinté, sinon il est blanc
     final bgColor = isAlert ? displayColor.withValues(alpha: 0.05) : Colors.white;
 
     return Container(
@@ -41,6 +46,7 @@ class SensorGauge extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // En-tête de la carte : Icône et badge d'alerte éventuel
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -67,6 +73,7 @@ class SensorGauge extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          // Libellé du capteur (ex: "Temp.")
           Text(
             label,
             style: const TextStyle(
@@ -76,6 +83,7 @@ class SensorGauge extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
+          // Valeur chiffrée animée (ex: "24.5°C")
           TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: value),
             duration: const Duration(milliseconds: 1200),
@@ -91,6 +99,7 @@ class SensorGauge extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          // Barre de progression linéaire animée
           TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: fraction),
             duration: const Duration(milliseconds: 1200),

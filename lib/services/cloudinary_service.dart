@@ -3,21 +3,25 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CloudinaryService {
-  // À remplacer par vos identifiants Cloudinary
+  // Identifiants Cloudinary pour l'upload d'images
   static const String cloudName = 'dlqdhyydm';
   static const String uploadPreset = 'monjardin_preset';
 
+  /// Téléverse (upload) une image vers le service Cloudinary
+  /// [file] : Le fichier image physique à envoyer
+  /// [path] : Le chemin/nom souhaité
   static Future<String> uploadImage(File file, String path) async {
-    // Dans Cloudinary, le path peut servir de dossier/nom de fichier via public_id
-    // Mais avec un upload non signé, on a souvent juste 'upload_preset', on peut
-    // passer 'folder' si le preset le permet.
+    // Dans Cloudinary, l'upload non signé utilise le 'upload_preset' configuré côté serveur.
+    // On peut spécifier un dossier ('folder') si le preset le permet.
 
     final url = Uri.parse(
       'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
     );
+    
+    // Création d'une requête multipart pour envoyer le fichier binaire
     final request = http.MultipartRequest('POST', url)
       ..fields['upload_preset'] = uploadPreset
-      // Dossier optionnel pour organiser sur Cloudinary
+      // Définit le dossier cible sur Cloudinary pour organiser les images
       ..fields['folder'] = 'jardinapp'
       ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
@@ -36,8 +40,10 @@ class CloudinaryService {
     }
   }
 
+  /// Tente de supprimer une image hébergée sur Cloudinary (non implémenté côté client pour des raisons de sécurité)
   static Future<void> deleteImage(String url) async {
-    // La suppression nécessite généralement une authentification signée API (Secret)
-    // Nous l'ignorons silencieusement pour une configuration côté client.
+    // La suppression via l'API Cloudinary nécessite généralement une signature générée avec l'API Secret.
+    // Pour des raisons de sécurité (ne pas exposer le secret dans l'application cliente), 
+    // l'implémentation est volontairement laissée vide ici. Idéalement gérée via une Cloud Function.
   }
 }

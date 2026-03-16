@@ -1,0 +1,21 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+      - run: flutter pub get
+      - run: flutter build ipa --no-codesign
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: jardinapp-ipa
+          path: build/ios/ipa/*.ipa

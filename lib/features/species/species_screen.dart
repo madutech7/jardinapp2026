@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../models/species_info.dart';
 
+/// Écran 'Encyclopédie' affichant la liste de toutes les espèces de plantes disponibles
 class SpeciesScreen extends StatefulWidget {
   const SpeciesScreen({super.key});
 
@@ -11,15 +12,23 @@ class SpeciesScreen extends StatefulWidget {
 }
 
 class _SpeciesScreenState extends State<SpeciesScreen> {
+  // Texte de recherche tapé par l'utilisateur
   String _query = '';
+  // Filtre de difficulté sélectionné (all, easy, medium, hard)
   String _filter = 'all'; // 'all', 'easy', 'medium', 'hard'
 
+  /// Fonction qui retourne la liste des espèces filtrées selon la recherche et la difficulté
   List<SpeciesInfo> get _filteredSpecies {
     return SpeciesDatabase.species.where((s) {
+      // Vérifie si le nom commun ou le nom scientifique contient le texte recherché
       final matchesQuery = _query.isEmpty ||
           s.name.toLowerCase().contains(_query.toLowerCase()) ||
           s.scientificName.toLowerCase().contains(_query.toLowerCase());
+      
+      // Vérifie si la difficulté de l'espèce correspond au filtre sélectionné
       final matchesFilter = _filter == 'all' || s.difficulty == _filter;
+      
+      // La plante doit correspondre aux deux critères pour être affichée
       return matchesQuery && matchesFilter;
     }).toList();
   }
@@ -117,26 +126,32 @@ class _SpeciesScreenState extends State<SpeciesScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final s = species[index];
+                    // Animation d'apparition progressive (fondu) des cartes d'espèces
                     return TweenAnimationBuilder<double>(
                       tween: Tween<double>(begin: 0, end: 1),
+                      // La durée de l'animation augmente légèrement pour chaque élément (effet en cascade)
                       duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 300)),
                       curve: Curves.easeOutQuart,
                       builder: (context, value, child) {
                         return Opacity(
                           opacity: value,
                           child: Transform.translate(
+                            // Déplacement de la carte de la droite vers la gauche
                             offset: Offset(30 * (1 - value), 0),
                             child: child,
                           ),
                         );
                       },
+                      // Affichage de la carte pour cette espèce spécifique
                       child: _SpeciesCard(species: s),
                     );
                   },
+                  // Nombre total d'éléments à afficher
                   childCount: species.length,
                 ),
               ),
             ),
+          // Espace vide en bas pour permettre de scroller jusqu'au bout
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
@@ -144,12 +159,13 @@ class _SpeciesScreenState extends State<SpeciesScreen> {
   }
 }
 
+/// Widget privé représentant une "puce" (chip) pour filtrer les espèces par difficulté
 class _FilterChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool selected;
-  final VoidCallback onTap;
-  final Color? color;
+  final String label; // Texte affiché (ex: "Facile")
+  final String value; // Valeur associée (ex: "easy")
+  final bool selected; // Indique si ce filtre est actuellement actif
+  final VoidCallback onTap; // Action au clic
+  final Color? color; // Couleur de la puce quand elle est sélectionnée
 
   const _FilterChip({
     required this.label,
@@ -185,10 +201,12 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
+/// Widget privé représentant la carte d'une espèce dans la liste
 class _SpeciesCard extends StatelessWidget {
-  final SpeciesInfo species;
+  final SpeciesInfo species; // L'objet contenant les informations de l'espèce
   const _SpeciesCard({required this.species});
 
+  /// Retourne la couleur associée à la difficulté (vert pour facile, rouge pour difficile)
   Color get _difficultyColor {
     switch (species.difficulty) {
       case 'easy':
@@ -200,6 +218,7 @@ class _SpeciesCard extends StatelessWidget {
     }
   }
 
+  /// Retourne le libellé français correspondant au niveau de difficulté
   String get _difficultyLabel {
     switch (species.difficulty) {
       case 'easy':
@@ -344,10 +363,11 @@ class _SpeciesCard extends StatelessWidget {
   }
 }
 
+/// Widget privé pour afficher une petite icône avec un texte d'information (ex: besoins en eau)
 class _InfoPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
+  final IconData icon; // Icône (ex: goutte d'eau, soleil)
+  final String label; // Texte de l'information (ex: "Peu", "Soleil")
+  final Color color; // Couleur principale du pillule
 
   const _InfoPill({required this.icon, required this.label, required this.color});
 

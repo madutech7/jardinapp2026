@@ -1,9 +1,9 @@
-// This is a basic Flutter widget test.
+// Ceci est un test unitaire de base pour un widget Flutter.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Pour interagir avec un widget dans votre test, utilisez l'utilitaire WidgetTester
+// fourni par le package flutter_test. Par exemple, vous pouvez simuler des appuis
+// et des glissements. Vous pouvez aussi utiliser WidgetTester pour trouver des widgets 
+// enfants dans l'arbre des widgets, lire du texte et vérifier leurs propriétés.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,10 +13,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+    // Construit notre application et déclenche le rendu d'une image (frame)
     await tester.pumpWidget(const ProviderScope(child: JardinApp()));
     
-    // We can just verify the app starts up
+    // On vérifie simplement que l'application démarre bien en trouvant le MaterialApp principal
     expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

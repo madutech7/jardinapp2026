@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../models/reminder.dart';
 import '../../services/firebase_service.dart';
 
+/// Écran 'Rappels' affichant la liste des tâches à accomplir (arrosage, engrais, etc.)
 class RemindersScreen extends ConsumerStatefulWidget {
   const RemindersScreen({super.key});
 
@@ -14,6 +15,7 @@ class RemindersScreen extends ConsumerStatefulWidget {
 }
 
 class _RemindersScreenState extends ConsumerState<RemindersScreen> {
+  /// Affiche le formulaire (BottomSheet) pour ajouter un nouveau rappel
   void _showAddReminderSheet() {
     showModalBottomSheet(
       context: context,
@@ -25,6 +27,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Écoute des rappels depuis le fournisseur (provider) asynchrone
     final remindersAsync = ref.watch(remindersProvider);
 
     return Scaffold(
@@ -38,9 +41,14 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       ),
       body: remindersAsync.when(
         data: (reminders) {
+          // Tri et filtrage des rappels en différentes catégories
+          // Rappels dont la date est dépassée
           final overdue = reminders.where((r) => r.isOverdue).toList();
+          // Rappels prévus pour aujourd'hui
           final dueToday = reminders.where((r) => r.isDueToday).toList();
+          // Rappels futurs non terminés
           final upcoming = reminders.where((r) => !r.isOverdue && !r.isDueToday && !r.isCompleted).toList();
+          // Rappels déjà terminés
           final completed = reminders.where((r) => r.isCompleted).toList();
 
           return CustomScrollView(
@@ -172,10 +180,11 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
   }
 }
 
+/// En-tête de section pour les différentes listes de rappels (ex: "En retard", "Aujourd'hui")
 class _SectionHeader extends StatelessWidget {
-  final String title;
-  final int count;
-  final Color color;
+  final String title; // Titre de la section
+  final int count; // Nombre d'éléments dans la section
+  final Color color; // Couleur de la section
 
   const _SectionHeader(this.title, {required this.count, required this.color});
 
@@ -223,11 +232,13 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+/// Widget privé représentant une carte pour un rappel spécifique
 class _ReminderCard extends ConsumerWidget {
-  final Reminder reminder;
-  final String plantId;
+  final Reminder reminder; // L'objet rappel contenant les données
+  final String plantId; // ID de la plante associée
   const _ReminderCard({required this.reminder, required this.plantId});
 
+  /// Détermine la couleur de l'icône selon le type de rappel
   Color get _typeColor {
     switch (reminder.type) {
       case ReminderType.watering:
@@ -245,6 +256,7 @@ class _ReminderCard extends ConsumerWidget {
     }
   }
 
+  /// Détermine l'icône selon le type de rappel
   IconData get _typeIcon {
     switch (reminder.type) {
       case ReminderType.watering:
@@ -424,22 +436,30 @@ class _ReminderCard extends ConsumerWidget {
 }
 
 // Add Reminder Sheet
+/// Panneau (BottomSheet) affichant le formulaire de création d'un nouveau rappel
 class _AddReminderSheet extends ConsumerStatefulWidget {
   @override
   ConsumerState<_AddReminderSheet> createState() => _AddReminderSheetState();
 }
 
 class _AddReminderSheetState extends ConsumerState<_AddReminderSheet> {
+  // Contrôleurs pour les champs de saisie de texte
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
+  
+  // Variables d'état pour les champs du formulaire
   ReminderType _type = ReminderType.watering;
   ReminderFrequency _frequency = ReminderFrequency.weekly;
   DateTime _dueDate = DateTime.now().add(const Duration(days: 3));
   String? _selectedPlantId;
   String _selectedPlantName = '';
+  
+  // Indicateur de chargement
   bool _loading = false;
 
+  /// Sauvegarde du nouveau rappel dans Firebase
   Future<void> _save() async {
+    // Vérification des champs requis
     if (_titleController.text.isEmpty || _selectedPlantId == null) return;
     setState(() => _loading = true);
     try {

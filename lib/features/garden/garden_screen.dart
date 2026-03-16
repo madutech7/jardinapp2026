@@ -8,21 +8,22 @@ import '../../providers/app_providers.dart';
 import '../../widgets/plant_card.dart';
 import '../../models/reminder.dart';
 
+/// Écran principal "Jardin" affichant le tableau de bord, les statistiques globales et la liste des plantes de l'utilisateur
 class GardenScreen extends ConsumerWidget {
   const GardenScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Récupération des données du jardin en temps réel via les fournisseurs d'état (providers)
     final plantsAsync = ref.watch(plantsStreamProvider);
     final stats = ref.watch(gardenStatsProvider);
-
     final overdueReminders = ref.watch(overdueRemindersProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAF8), // From design
+      backgroundColor: const Color(0xFFF7FAF8), // From design / Couleur de fond inspirée du design Veridia
       body: CustomScrollView(
         slivers: [
-          // En-tête unifié et zone du tableau de bord
+          // En-tête unifié et zone du tableau de bord (Header)
           SliverToBoxAdapter(
             child: Container(
               decoration: BoxDecoration(
@@ -134,7 +135,7 @@ class GardenScreen extends ConsumerWidget {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          // Section Title
+          // Titre de la section
           const SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             sliver: SliverToBoxAdapter(
@@ -144,7 +145,7 @@ class GardenScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Grille des plantes
+          // Grille affichant la liste des plantes de l'utilisateur
           plantsAsync.when(
             data: (plants) {
               if (plants.isEmpty) {
@@ -218,6 +219,7 @@ class GardenScreen extends ConsumerWidget {
     );
   }
 
+  /// Génère un message d'accueil dynamique en fonction de l'heure locale
   String _getTimeGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Bonjour,';
@@ -226,9 +228,10 @@ class GardenScreen extends ConsumerWidget {
   }
 }
 
+/// Widget privé affichant le tableau de bord global "Veridia" (Statistiques et anneau de santé global)
 class _VeridiaDashboard extends StatelessWidget {
-  final GardenStats stats;
-  final int pendingCount;
+  final GardenStats stats; // Les statistiques globales
+  final int pendingCount;  // Le nombre de tâches en attente
 
   const _VeridiaDashboard({required this.stats, required this.pendingCount});
 
@@ -358,9 +361,10 @@ class _VeridiaDashboard extends StatelessWidget {
   }
 }
 
+/// Dessinateur personnalisé (CustomPainter) pour tracer l'anneau de santé en dégradé
 class _GradientRingPainter extends CustomPainter {
-  final double progress;
-  final Color primaryColor;
+  final double progress; // Niveau de complétion de l'anneau (0.0 à 1.0)
+  final Color primaryColor; // Couleur principale du tracé
 
   _GradientRingPainter({required this.progress, required this.primaryColor});
 
@@ -370,14 +374,14 @@ class _GradientRingPainter extends CustomPainter {
     final radius = size.width / 2;
     const strokeWidth = 12.0;
 
-    // Background circle
+    // Dessin du cercle d'arrière-plan semi-transparent
     final bgPaint = Paint()
       ..color = primaryColor.withValues(alpha: 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
     canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
 
-    // Progress arc
+    // Dessin de l'arc de progression avec un dégradé (SweepGradient) coloré
     final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
     final progPaint = Paint()
       ..shader = SweepGradient(
@@ -401,8 +405,9 @@ class _GradientRingPainter extends CustomPainter {
   bool shouldRepaint(_GradientRingPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
+/// Widget privé affichant une liste horizontale de tâches recommandées (rappels)
 class _RecommendedTasks extends StatelessWidget {
-  final List<Reminder> reminders;
+  final List<Reminder> reminders; // Liste des tâches recommandées à afficher
   const _RecommendedTasks({required this.reminders});
 
   IconData _getTypeIcon(ReminderType type) {
@@ -416,6 +421,7 @@ class _RecommendedTasks extends StatelessWidget {
     }
   }
 
+  /// Formate et renvoie le texte combiné de l'action et du nom de la plante
   String _getTaskString(Reminder r) {
     final act = {
       ReminderType.watering: 'Arroser',
@@ -426,7 +432,7 @@ class _RecommendedTasks extends StatelessWidget {
       ReminderType.other: 'Vérifier',
     }[r.type]!;
     
-    // Attempting to extract single name if it's like Fiddle Leaf Fig "Leo"
+    // Tente d'extraire le prénom ou le premier mot du nom de la plante (ex: "Léo" dans Ficus "Léo")
     final nicknameMatch = RegExp(r'"([^"]*)"').firstMatch(r.plantName);
     final plantName = nicknameMatch != null ? nicknameMatch.group(1)! : r.plantName.split(' ').first;
     return '$act $plantName';
@@ -496,6 +502,7 @@ class _RecommendedTasks extends StatelessWidget {
   }
 }
 
+/// Vue affichée lorsque l'utilisateur n'a ajouté aucune plante à son jardin
 class _EmptyGarden extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -531,6 +538,7 @@ class _EmptyGarden extends StatelessWidget {
   }
 }
 
+/// Effet visuel temporaire (squelette gris) affiché pendant le chargement des plantes
 class _ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

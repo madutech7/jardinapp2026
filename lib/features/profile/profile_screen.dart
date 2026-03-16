@@ -1,24 +1,39 @@
+// Importation de la bibliothèque 'dart:ui' pour les effets visuels (comme BackdropFilter)
 import 'dart:ui';
+// Importation du framework Flutter et de ses widgets de base
 import 'package:flutter/material.dart';
+// Importation de Riverpod pour la gestion de l'état global de l'application
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Importation des fichiers nécessaires du projet : thème, fournisseurs d'état, services
 import '../../core/theme.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/firebase_service.dart';
 import 'package:go_router/go_router.dart';
+// Importation pour charger et mettre en cache les images depuis le réseau
 import 'package:cached_network_image/cached_network_image.dart';
 
+/// Écran 'Profil' permettant de visualiser les informations de l'utilisateur,
+/// ses statistiques générales et d'accéder aux paramètres de l'application.
 class ProfileScreen extends ConsumerWidget {
+  // Constructeur constant pour optimiser les performances
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Écoute de l'état d'authentification pour obtenir l'utilisateur connecté
     final authState = ref.watch(authStateProvider);
     final user = authState.value;
+    
+    // Écoute des données statistiques du jardin (nombre de plantes, d'espèces, santé moyenne)
     final stats = ref.watch(gardenStatsProvider);
+    
+    // Écoute des préférences de l'utilisateur (thème sombre/clair, langue, notifications)
     final settings = ref.watch(settingsProvider);
     
-    // Fallback if user is null (shouldn't happen on this screen due to guard)
+    // Vérification de sécurité : si aucun utilisateur n'est connecté, 
+    // on affiche une interface vide (un garde de route devrait éviter d'arriver ici)
     if (user == null) return const SizedBox.shrink();
 
     return Scaffold(
@@ -248,7 +263,9 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  /// Affiche une boîte de dialogue de confirmation avant la déconnexion
   void _confirmSignOut(BuildContext context) async {
+    // Attendre le choix de l'utilisateur dans la boîte de dialogue
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -267,7 +284,9 @@ class ProfileScreen extends ConsumerWidget {
     if (confirm == true) await FirebaseService.signOut();
   }
 
+  /// Affiche une boîte de dialogue de confirmation avant la suppression définitive du compte
   void _confirmDeleteAccount(BuildContext context) async {
+    // Demander la confirmation à travers une boîte de dialogue (dialogue d'alerte)
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -298,7 +317,9 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
+  /// Affiche un menu modal pour sélectionner la langue de l'application
   void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    // Affichage d'un panneau glissant (BottomSheet) depuis le bas de l'écran
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
@@ -332,9 +353,11 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+/// Widget privé pour afficher un élément de statistique dans l'en-tête (ex: nombre de plantes)
 class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
+  final String label; // Nom de la statistique (ex: "Plantes")
+  final String value; // Valeur associée (ex: "12")
+  
   const _StatItem({required this.label, required this.value});
 
   @override
@@ -355,6 +378,7 @@ class _StatItem extends StatelessWidget {
   }
 }
 
+/// Widget privé pour créer un séparateur vertical stylisé entre les statistiques
 class _VerticalDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -362,8 +386,9 @@ class _VerticalDivider extends StatelessWidget {
   }
 }
 
+/// Widget privé pour afficher un titre de section dans la liste des options (ex: "Paramètres")
 class _SectionTitle extends StatelessWidget {
-  final String text;
+  final String text; // Le texte du titre
   const _SectionTitle(this.text);
 
   @override
@@ -380,12 +405,13 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+/// Widget privé pour créer une tuile de paramètre (option cliquable avec icône)
 class _ProfileTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback onTap;
+  final IconData icon; // Icône à afficher à gauche
+  final String title; // Titre principal de l'option
+  final String? subtitle; // Sous-titre optionnel
+  final Widget? trailing; // Widget personnalisé à afficher à droite (ex: un interrupteur Switch)
+  final VoidCallback onTap; // Action exécutée au clic
 
   const _ProfileTile({
     required this.icon,

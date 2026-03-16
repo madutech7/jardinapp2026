@@ -16,12 +16,14 @@ import '../../widgets/health_ring.dart';
 import '../../widgets/sensor_gauge.dart';
 import '../../models/species_info.dart';
 
+/// Écran affichant les détails complets d'une plante spécifique
 class PlantDetailScreen extends ConsumerWidget {
-  final String plantId;
+  final String plantId; // L'identifiant unique de la plante
   const PlantDetailScreen({super.key, required this.plantId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Récupération des données asynchrones via Riverpod
     final plantAsync = ref.watch(plantProvider(plantId));
     final latestReading = ref.watch(latestSensorReadingProvider(plantId));
     final readingsAsync = ref.watch(sensorReadingsProvider(plantId));
@@ -59,8 +61,10 @@ class _PlantDetailContent extends ConsumerStatefulWidget {
 }
 
 class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
+  // Indicateur de chargement pour la simulation
   bool _simulating = false;
 
+  /// Fonction pour générer de fausses données de capteur (pour la démo)
   Future<void> _simulateReading() async {
     setState(() => _simulating = true);
     try {
@@ -72,7 +76,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
         FirebaseService.sensorReadingsRef(widget.plant.id),
         reading.toFirestore(),
       );
-      // Update plant health score
+      // Met à jour le score de santé de la plante en fonction des nouvelles lectures
       await FirebaseService.updateDocument(
         FirebaseService.plantsRef,
         widget.plant.id,
@@ -91,6 +95,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
     }
   }
 
+  /// Affiche une boîte de dialogue pour confirmer la suppression de la plante
   Future<void> _deletePlant() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -106,11 +111,13 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
         ],
       ),
     );
+    // Si l'utilisateur a confirmé la suppression
     if (confirm == true) {
       if (widget.plant.photoUrl != null) {
         await CloudinaryService.deleteImage(widget.plant.photoUrl!);
       }
       await FirebaseService.deleteDocument(FirebaseService.plantsRef, widget.plant.id);
+      // Redirection vers le jardin après la suppression
       if (mounted) context.go('/garden');
     }
   }
@@ -305,7 +312,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Health & quick info row
+                    // Ligne affichant l'anneau de santé et les infos rapides
                     Row(
                       children: [
                         HealthRing(percent: plant.healthScore, size: 90, strokeWidth: 9),
@@ -368,7 +375,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
                       ),
                     ],
 
-                    // Encyclopedia Link
+                    // Lien vers la page de l'encyclopédie de l'espèce
                     _SpeciesEncyclopediaLink(speciesName: plant.species),
                     if (latest != null && (latest.needsWatering || latest.tooCold || latest.tooHot || latest.insufficientLight)) ...[
                       const SizedBox(height: 24),
@@ -376,7 +383,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
                     ],
 
                     const SizedBox(height: 32),
-                    // Sensor readings section
+                    // Section des données des capteurs en temps réel
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -472,7 +479,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
                       ),
                     ],
 
-                    // Simulate button
+                    // Bouton pour lancer une simulation de capteurs
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                       onPressed: _simulating ? null : _simulateReading,
@@ -495,7 +502,7 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
                     ],
 
                     const SizedBox(height: 24),
-                    // Action buttons
+                    // Boutons d'actions rapides (Arroser, Ajouter Note, Historique)
                     Text('Actions', style: Theme.of(context).textTheme.headlineLarge),
                     const SizedBox(height: 16),
                     Row(
@@ -540,9 +547,10 @@ class _PlantDetailContentState extends ConsumerState<_PlantDetailContent> {
   }
 }
 
+/// Tag d'information privé stylisé avec effet de verre (Glassmorphism)
 class _InfoTag extends StatelessWidget {
-  final IconData icon;
-  final String label;
+  final IconData icon; // Icône à afficher
+  final String label; // Texte du tag
 
   const _InfoTag({required this.icon, required this.label});
 
@@ -576,8 +584,9 @@ class _InfoTag extends StatelessWidget {
   }
 }
 
+/// Widget privé affichant un lien visuel vers l'encyclopédie pour l'espèce de la plante
 class _SpeciesEncyclopediaLink extends StatelessWidget {
-  final String speciesName;
+  final String speciesName; // Nom de l'espèce à rechercher
   const _SpeciesEncyclopediaLink({required this.speciesName});
 
   @override
@@ -632,8 +641,9 @@ class _SpeciesEncyclopediaLink extends StatelessWidget {
   }
 }
 
+/// Widget affichant les alertes de santé basées sur les dernières lectures de capteurs
 class _AlertsSection extends StatelessWidget {
-  final SensorReading reading;
+  final SensorReading reading; // Les données capteurs à analyser
   const _AlertsSection({required this.reading});
 
   @override
@@ -680,8 +690,9 @@ class _AlertsSection extends StatelessWidget {
   }
 }
 
+/// Widget graphique affichant l'évolution de l'humidité du sol
 class _SensorChart extends StatelessWidget {
-  final List<SensorReading> readings;
+  final List<SensorReading> readings; // Liste historique des données capteurs
   const _SensorChart({required this.readings});
 
   @override
@@ -751,11 +762,12 @@ class _SensorChart extends StatelessWidget {
   }
 }
 
+/// Petit bouton rond d'action personnalisable
 class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback onTap;
+  final IconData icon; // Icône du bouton
+  final String label;  // Texte affiché sous l'icône
+  final Color? color;  // Couleur principale du bouton
+  final VoidCallback onTap; // Action exécutée au clic
 
   const _ActionButton({required this.icon, required this.label, required this.onTap, this.color});
 

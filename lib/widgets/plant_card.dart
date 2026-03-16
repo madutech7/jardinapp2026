@@ -5,17 +5,20 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme.dart';
 import '../../models/plant_model.dart';
 
+/// Widget représentant une carte individuelle pour chaque plante dans la grille du jardin
 class PlantCard extends StatelessWidget {
-  final PlantModel plant;
+  final PlantModel plant; // Le modèle de données de la plante à afficher
   const PlantCard({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
+    // Extraction des informations de santé pour l'affichage dynamique
     final health = plant.healthScore;
-    final statusText = _healthText(health);
-    final statusColor = _statusColor(statusText);
-    final statusIcon = _statusIcon(statusText);
+    final statusText = _healthText(health); // Ex: "En pleine forme", "Besoin d'eau"
+    final statusColor = _statusColor(statusText); // Couleur associée au statut
+    final statusIcon = _statusIcon(statusText); // Icône associée au statut
 
+    // GestureDetector permet de naviguer vers les détails de la plante lors d'un appui
     return GestureDetector(
       onTap: () => context.push('/plant/${plant.id}'),
       child: Container(
@@ -35,17 +38,17 @@ class PlantCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Background Image Full Bleed
+              // Image de base qui remplit toute la carte (Full Bleed)
               plant.photoUrl != null
                   ? CachedNetworkImage(
                       imageUrl: plant.photoUrl!,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.cover, // Redimensionnement pour remplir sans déformer
                       placeholder: (context, url) => _PlantPlaceholder(),
                       errorWidget: (context, url, error) => _PlantPlaceholder(),
                     )
                   : _PlantPlaceholder(),
 
-              // Top Gradient for contrast
+              // Dégradé supérieur (Top Gradient) pour assurer le contraste avec l'étiquette de santé
               Positioned(
                 top: 0,
                 left: 0,
@@ -65,7 +68,7 @@ class PlantCard extends StatelessWidget {
                 ),
               ),
 
-              // Health Score Badge Top Right
+              // Badge affichant le pourcentage de santé en haut à droite
               Positioned(
                 top: 14,
                 right: 14,
@@ -96,7 +99,7 @@ class PlantCard extends StatelessWidget {
                 ),
               ),
 
-              // Bottom Glassmorphism Info
+              // Zone d'informations en bas avec effet de verre dépoli (Glassmorphism)
               Positioned(
                 bottom: 8,
                 left: 8,
@@ -177,6 +180,7 @@ class PlantCard extends StatelessWidget {
     );
   }
 
+  /// Détermine le texte descriptif de l'état de la plante basé sur son score de santé
   String _healthText(double h) {
     if (h >= 90) return 'En pleine forme';
     if (h >= 80) return 'Besoin d\'eau';
@@ -186,6 +190,7 @@ class PlantCard extends StatelessWidget {
     return 'Critique';
   }
 
+  /// Assigne une couleur spécifique selon le statut textuel
   Color _statusColor(String status) {
     switch (status) {
       case 'En pleine forme': return AppTheme.primaryGreen;
@@ -196,6 +201,7 @@ class PlantCard extends StatelessWidget {
     }
   }
 
+  /// Assigne une icône spécifique selon le statut textuel
   IconData _statusIcon(String status) {
     switch (status) {
       case 'En pleine forme': return Icons.eco_rounded;
@@ -207,6 +213,7 @@ class PlantCard extends StatelessWidget {
   }
 }
 
+/// Widget privé affichant un espace réservé (Placeholder) si la plante n'a pas d'image
 class _PlantPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

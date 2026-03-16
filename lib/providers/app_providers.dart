@@ -8,16 +8,22 @@ import '../models/sensor_reading.dart';
 import '../models/plant_note.dart';
 import '../models/reminder.dart';
 
-// Auth Providers
+// === Fournisseurs d'Authentification (Auth Providers) ===
+
+/// Fournisseur d'état écoutant les changements d'authentification de l'utilisateur.
+/// Retourne le flux (stream) de l'utilisateur Firebase actuel.
 final authStateProvider = StreamProvider<User?>((ref) {
   return FirebaseService.userChanges;
 });
 
+/// Fournisseur utilitaire pour accéder facilement à l'utilisateur connecté de manière synchrone.
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authStateProvider).value;
 });
 
-// Plants Providers
+// === Fournisseurs de Plantes (Plants Providers) ===
+
+/// Écoute en temps réel la collection de plantes de l'utilisateur connecté depuis Firestore.
 final plantsStreamProvider = StreamProvider<List<PlantModel>>((ref) {
   final user = ref.watch(currentUserProvider);
   if (user == null) return const Stream.empty();
@@ -30,16 +36,20 @@ final plantsStreamProvider = StreamProvider<List<PlantModel>>((ref) {
         .map((doc) => PlantModel.fromFirestore(doc))
         .toList();
     
-    // Sort locally by descending createdAt to avoid needing a Firestore composite index
+    // Tri localement par date de création (les plus récentes en premier)
+    // Cela évite de devoir créer un index composite complexe sur Firestore.
     plants.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-    // Cache locally
+    // Mise en cache locale (dans la base de données SQLite locale)
     for (final plant in plants) {
       LocalDatabase.upsertPlant(plant);
     }
     return plants;
   });
 });
+
+/// Fournisseur permettant d'écouter les détails d'une seule plante spécifique.
+/// Reste synchronisé en temps réel avec Firestore.
 
 final plantProvider = StreamProvider.family<PlantModel?, String>((ref, plantId) {
   return FirebaseService.plantsRef
@@ -48,7 +58,9 @@ final plantProvider = StreamProvider.family<PlantModel?, String>((ref, plantId) 
       .map((doc) => doc.exists ? PlantModel.fromFirestore(doc) : null);
 });
 
-// Sensor Readings Providers
+// === Fournisseurs de Capteurs (Sensor Readings Providers) ===
+
+/// Écoute les 50 dernières lectures de capteurs pour une plante donnée.
 final sensorReadingsProvider = StreamProvider.family<List<SensorReading>, String>((ref, plantId) {
   return FirebaseService.sensorReadingsRef(plantId)
       .orderBy('timestamp', descending: true)
@@ -65,12 +77,15 @@ final sensorReadingsProvider = StreamProvider.family<List<SensorReading>, String
   });
 });
 
+/// Fournisseur utilitaire extrayant uniquement la lecture de capteur la plus récente.
 final latestSensorReadingProvider = Provider.family<SensorReading?, String>((ref, plantId) {
   final readings = ref.watch(sensorReadingsProvider(plantId));
   return readings.value?.isNotEmpty == true ? readings.value!.first : null;
 });
 
-// Notes Providers
+// === Fournisseurs de Notes (Notes Providers) ===
+
+/// Écoute en temps réel toutes les notes (journal) associées à une plante spécifique.
 final plantNotesProvider = StreamProvider.family<List<PlantNote>, String>((ref, plantId) {
   return FirebaseService.plantNotesRef(plantId)
       .orderBy('createdAt', descending: true)
@@ -86,7 +101,9 @@ final plantNotesProvider = StreamProvider.family<List<PlantNote>, String>((ref, 
   });
 });
 
-// Reminders Providers
+// === Fournisseurs de Rappels (Reminders Providers) ===
+
+/// Écoute la liste complète des rappels de l'utilisateur depuis Firestore.
 final remindersProvider = StreamProvider<List<Reminder>>((ref) {
   final user = ref.watch(currentUserProvider);
   if (user == null) return const Stream.empty();
@@ -96,23 +113,28 @@ final remindersProvider = StreamProvider<List<Reminder>>((ref) {
       .snapshots()
       .map((snapshot) {
         final reminders = snapshot.docs.map((doc) => Reminder.fromFirestore(doc)).toList();
-        // Sort locally by nextDueDate ascending to avoid needing a Firestore composite index
+        // Tri localement par date prévue croissante pour éviter le besoin d'un index composite Firestore.
         reminders.sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
         return reminders;
       });
 });
 
+/// Extrait et filtre uniquement les rappels qui ne sont pas encore terminés.
 final pendingRemindersProvider = Provider<List<Reminder>>((ref) {
   final reminders = ref.watch(remindersProvider);
   return reminders.value?.where((r) => !r.isCompleted).toList() ?? [];
 });
 
+/// Extrait spécifiquement les rappels dont la date prévue est dépassée.
 final overdueRemindersProvider = Provider<List<Reminder>>((ref) {
   final reminders = ref.watch(pendingRemindersProvider);
   return reminders.where((r) => r.isOverdue).toList();
 });
 
-// Garden Stats Provider
+// === Fournisseur de Statistiques du Jardin (Garden Stats Provider) ===
+
+/// Calcule et fournit les statistiques globales du jardin (santé moyenne, nb de plantes, alertes).
+/// Se met à jour automatiquement si les données des plantes ou des rappels changent.
 final gardenStatsProvider = Provider<GardenStats>((ref) {
   final plants = ref.watch(plantsStreamProvider).value ?? [];
   final reminders = ref.watch(pendingRemindersProvider);
@@ -165,7 +187,10 @@ class GardenStats {
   );
 }
 
-// Sensor Simulation
+// === Outil de Simulation (Sensor Simulation) ===
+
+/// Classe utilitaire générant des données factices (simulées) pour les capteurs.
+/// Utilisé pour démontrer les fonctionnalités de l'application sans matériel physique.
 class SensorSimulator {
   static final _random = Random();
 
@@ -173,12 +198,12 @@ class SensorSimulator {
     double moisture, temp, light;
 
     if (previous != null) {
-      // Gradual changes from previous reading
+      // Évolution graduelle et réaliste par rapport à la dernière lecture
       moisture = (previous.soilMoisture + (_random.nextDouble() * 20 - 12)).clamp(10, 95);
       temp = (previous.temperature + (_random.nextDouble() * 4 - 2)).clamp(5, 40);
       light = (previous.light + (_random.nextDouble() * 30 - 15)).clamp(5, 100);
     } else {
-      // Fresh random reading
+      // Nouvelle lecture complètement aléatoire
       moisture = 30 + _random.nextDouble() * 50;
       temp = 18 + _random.nextDouble() * 12;
       light = 40 + _random.nextDouble() * 50;

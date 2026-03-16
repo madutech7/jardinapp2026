@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
 import 'providers/settings_provider.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +19,16 @@ void main() async {
     ),
   );
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialisation de Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Erreur lors de l\'initialisation de Firebase: $e');
+    // On continue quand même pour essayer d'afficher l'UI, 
+    // ou on pourrait afficher un écran d'erreur spécifique.
+  }
 
   // Initialize French locale for intl
   await initializeDateFormatting('fr', null);

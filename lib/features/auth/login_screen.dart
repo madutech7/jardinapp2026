@@ -134,7 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 ),
                                 const SizedBox(height: 24),
                                 const Text(
-                                  'Veridia',
+                                  'MonJardin',
                                   style: TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.w800,

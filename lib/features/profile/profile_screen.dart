@@ -251,7 +251,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
-                    'Version 2.0.0 • Veridia Garden',
+                    'Version 2.0.0 • MonJardin',
                     style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.5), fontSize: 12),
                   ),
                 ),

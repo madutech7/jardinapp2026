@@ -621,7 +621,7 @@ class _SpeciesEncyclopediaLink extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Encyclopédie Veridia',
+                      'Encyclopédie MonJardin',
                       style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppTheme.textDark),
                     ),
                     const SizedBox(height: 2),

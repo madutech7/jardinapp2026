@@ -20,7 +20,7 @@ class GardenScreen extends ConsumerWidget {
     final overdueReminders = ref.watch(overdueRemindersProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAF8), // From design / Couleur de fond inspirée du design Veridia
+      backgroundColor: const Color(0xFFF7FAF8), // From design / Couleur de fond inspirée du design MonJardin
       body: CustomScrollView(
         slivers: [
           // En-tête unifié et zone du tableau de bord (Header)
@@ -125,7 +125,7 @@ class GardenScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  _VeridiaDashboard(
+                  _MonJardinDashboard(
                     stats: stats,
                     pendingCount: overdueReminders.length +
                         ref.watch(pendingRemindersProvider).length,
@@ -228,12 +228,12 @@ class GardenScreen extends ConsumerWidget {
   }
 }
 
-/// Widget privé affichant le tableau de bord global "Veridia" (Statistiques et anneau de santé global)
-class _VeridiaDashboard extends StatelessWidget {
+/// Widget privé affichant le tableau de bord global "MonJardin" (Statistiques et anneau de santé global)
+class _MonJardinDashboard extends StatelessWidget {
   final GardenStats stats; // Les statistiques globales
   final int pendingCount;  // Le nombre de tâches en attente
 
-  const _VeridiaDashboard({required this.stats, required this.pendingCount});
+  const _MonJardinDashboard({required this.stats, required this.pendingCount});
 
   @override
   Widget build(BuildContext context) {
